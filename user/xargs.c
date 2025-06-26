@@ -2,6 +2,7 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 #include "kernel/param.h"
+#define SIZE 1024
 
 void
 xargs(char *args[], int argc)
@@ -10,7 +11,7 @@ xargs(char *args[], int argc)
     int i, n;
     n = 0;
     while(n < MAXARG){
-        char *p = argv[n] = malloc(256);
+        char *p = argv[n] = malloc(SIZE);
         while(read(0, p, 1) > 0){
             if (*p == '\n') {
                 *p = '\0';
@@ -18,13 +19,6 @@ xargs(char *args[], int argc)
             }
             p++;
             i++;
-            if (i >= 256) {
-                char *new_p = malloc(128);
-                strcpy(new_p, argv[n]);
-                free(argv[n]);
-                argv[n] = new_p;
-                new_p += 64;
-            }
         }
         if (i == 0) {
             free(argv[n]);

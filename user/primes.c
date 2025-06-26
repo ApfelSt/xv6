@@ -1,60 +1,39 @@
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "user/user.h"
+#define NA -1
+#define NUM 35
 
-int nextPrime(int p)
+void logic(int p, int q, int prime, int end)
 {
-  int next = p + 1;
-  while (1) {
-    int isPrime = 1;
-    for (int i = 2; i * i <= next; i++) {
-      if (next % i == 0) {
-        isPrime = 0;
-        break;
-      }
-    }
-    if (isPrime) {
-      return next;
-    }
-    next++;
-  }
-}
-
-
-
-void logic(int p, int q, int end, int n)
-{
-    if(p==-1){
-        for(int i = 2; i < end; i++) {
+    if(p==NA){
+        for(int i = 2; i <= end; i++) {
             write(q, &i, 1);
         }
+        return;
     }
     int x;
     while(read(p, &x, 1) > 0){
-        if(x%n != 0){
+        if(x % prime != 0) {
             write(q, &x, 1);
-        }
-        if(x==n){
-            fprintf(1, "prime %d\n", x, n);
-        }
+        }    
     }
 }
 
-void demo2(int p, int n, int end)
+void demo2(int p, int end)
 {
-    if (n*n > end){
-        while(read(p, &n, 1) > 0) {
-            fprintf(1, "prime %d\n", n);
-        }
+    int prime;
+    if(read(p, &prime, 1) <= 0) {
         close(p);
-        exit(0);
+        return;
     }
+    fprintf(1, "prime %d\n", prime);
     int q[2];
     pipe(q);
     int f = fork();
     if(f>0){
         close(q[0]);
-        logic(p,q[1],end, n);
+        logic(p,q[1],prime,end);
         close(p);
         close(q[1]);
         f = wait((int *) 0);
@@ -63,8 +42,7 @@ void demo2(int p, int n, int end)
     if(f==0){
         close(p);
         close(q[1]);
-        n = nextPrime(n);
-        demo2(q[0], n, end);
+        demo2(q[0], end);
         close(q[0]);
         exit(0);
     }
@@ -79,7 +57,7 @@ void demo(int end)
     if(f>0)
     {
         close(p[0]);
-        logic(-1, p[1], end, 0);
+        logic(NA, p[1],0, end);
         close(p[1]);
         f = wait((int *) 0);
         exit(0);
@@ -87,7 +65,7 @@ void demo(int end)
     if(f==0)
     {
         close(p[1]);
-        demo2(p[0],2, end);
+        demo2(p[0], end);
         close(p[0]);
         exit(0);
     }
@@ -97,7 +75,6 @@ void demo(int end)
 int
 main(int argc, char *argv[])
 {
-  //primes(35);
-  demo(35);
+  demo(NUM);
   exit(0);
 }

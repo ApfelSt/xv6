@@ -2,6 +2,11 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 #include "kernel/fs.h"
+#define SIZE 512
+#define SLASH '/'
+#define SPACE ' '
+#define ME "."
+#define FATHER ".."
 
 char*
 fmtname(char *path)
@@ -10,7 +15,7 @@ fmtname(char *path)
   char *p;
 
   // Find first character after last slash.
-  for(p=path+strlen(path); p >= path && *p != '/'; p--)
+  for(p=path+strlen(path); p >= path && *p != SLASH; p--)
     ;
   p++;
 
@@ -18,13 +23,13 @@ fmtname(char *path)
   if(strlen(p) >= DIRSIZ)
     return p;
   memmove(buf, p, strlen(p));
-  memset(buf+strlen(p), ' ', DIRSIZ-strlen(p));
+  memset(buf+strlen(p), SPACE, DIRSIZ-strlen(p));
   return buf;
 }
 
 void find(char *dir, char *name)
 {
-  char buf[512], *p;
+  char buf[SIZE], *p;
   int fd;
   struct dirent de;
   struct stat st;
@@ -59,11 +64,11 @@ void find(char *dir, char *name)
     }*/
     strcpy(buf, dir);
     p = buf+strlen(buf);
-    *p++ = '/';
+    *p++ = SLASH;
     while(read(fd, &de, sizeof(de)) == sizeof(de)){
       if(de.inum == 0)
         continue;
-      if(strcmp(de.name,".")==0 || strcmp(de.name, "..")==0)
+      if(strcmp(de.name,ME)==0 || strcmp(de.name, FATHER)==0)
           continue;
       memmove(p, de.name, DIRSIZ);
       p[DIRSIZ] = 0;
